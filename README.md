@@ -2,7 +2,7 @@
 
 Radius leverages the fact that the gradient values exbit temporal stability during the pre-training, as shown in the image below:
 
-![Top-1% gradient distribution](./plot_gradient_density_distribution/across_time/GPT-355M/decoder.layers.2.mlp.dense_4h_to_h.weight.png "Top-1% gradient distribution")
+![Top-1% gradient distribution](./gradient_distribution/355M/decoder.layers.2.mlp.dense_4h_to_h.weight.png "Top-1% gradient distribution")
 
 This project is now being developed based on Megatron-LM.
 
