@@ -154,3 +154,10 @@ This is the path to the model checkpoints trained by using dense $allreduce$. If
 
 ### CHECKPOINT_PATH_SAVE
 This defines where the Radius checkpoints are saved to. If there are checkpoints in `CHECKPOINT_PATH_SAVE`, it will resume pre-training using the latest checkpoint in that path.
+
+### How to plot curves in paper
+Check the exmaples we prepared [here](./plot_loss_curves/logs/).
+
+### How to run evaluation
+1. Convert Megatron-LM checkpoint to HF format (Check the code [here](https://github.com/huggingface/transformers/blob/main/src/transformers/models/megatron_gpt2/convert_megatron_gpt2_checkpoint.py)). We prepared examples [here](./eval_model/lm-harness/2.0B/convert_megatron_lm_to_hf/baseline.sh).
+2. Use `lm-evaluation-harness` to evaluate the converted checkpoints ([example](./eval_model/lm-harness/2.0B/baseline.sh))
