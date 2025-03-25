@@ -26,31 +26,12 @@ from megatron import mpu
 from .module import MegatronModule
 
 from megatron.mpu import PowerSGDReducer
-# from megatron.mpu import TopKAStableCompressor
-# from megatron.mpu import AllReducer
-from megatron.mpu import StableTopKReducer
-# from megatron.mpu import StableTopKReducerWithBuckets
-from megatron.mpu import StableTopKReducerWithIdxBuckets
-from megatron.mpu import StableTopKReducerWithValBuckets
-from megatron.mpu import StableTopKReducerWithValBucketsEF
-from megatron.mpu import StableTopKReducerWithValBucketsCorrection
-from megatron.mpu import StableTopKReducerWithValBucketsEFCorrection
+
 from megatron.mpu import RandomizedSVDReducer
-from megatron.mpu import StableTopKReducerWithValBucketsEFCorrectionAutoDensity
-from megatron.mpu import StableTopKReducerWithValBucketsEFCorrectionAcrossAllLayers
-from megatron.mpu import StableTopKReducerWithRangeBucketsEFCorrection
+
 from megatron.mpu import StableTopKReducerWithRangeBucketsEFCorrectionResIsGrad
-from megatron.mpu import StableTopKReducerWithRangeBucketsEFCorrectionResIsGradAcrossAllLayers
-from megatron.mpu import StableTopKReducerWithRangeBucketsEFCorrectionResIsGradLAMB
-from megatron.mpu import StableTopKReducerWithRangeBucketsEFCorrectionResIsGradLAMBAcrossAllLayers
-from megatron.mpu import StableTopKReducerWithRangeBucketsEFCorrectionResIsGradWarmup
-from megatron.mpu import TopKReducerEFCorrectionResIsGradWarmup
-from megatron.mpu import StableTopKReducerWithRangeBucketsEFCorrectionResIsGradExp
-from megatron.mpu import StableTopKReducerWithRangeBucketsEFCorrectionResIsMomentum
-from megatron.mpu import StableTopKReducerWithRangeBucketsEFCorrectionResIsGradSign
-from megatron.mpu import StableTopKReducerWithRangeBucketsEFCorrectionResIsGradNorm
-from megatron.mpu import StableTopKReducerWithRangeBucketsEFCorrectionResIsGradSelectByGradDivW
 from megatron.mpu import StableTopKReducerWithRangeBucketsEFCorrectionResIsGradPerLayer
+from megatron.mpu import TopKReducerEFCorrectionResIsGradWarmup
 
 class MemoryBuffer:
 
@@ -190,112 +171,6 @@ class DistributedDataParallel(DistributedDataParallelBase):
             # [TODO] Add new compression algorithms. 
             #        Check compressors in compression.py to see all the supported comp algo.
             # [DONE] Remember to add new CMD argument to arguments.py
-            elif self.args.grad_comp_type == "StableTopK":
-                self.reducer = StableTopKReducer(random_seed=self.args.comp_seed,
-                                                 device=torch.cuda.current_device(),
-                                                 group=mpu.get_data_parallel_group(),
-                                                 group_num=mpu.get_data_parallel_world_size(),
-                                                 density=self.args.density, 
-                                                 stable_topk_interval=self.args.stable_topk_interval, 
-                                                 stable_topk_threshold=self.args.stable_topk_threshold, 
-                                                 stable_topk_warmup_method=self.args.stable_topk_warmup_method)
-            
-            elif self.args.grad_comp_type == "StableTopKReducerWithIdxBuckets":
-                self.reducer = StableTopKReducerWithIdxBuckets(random_seed=self.args.comp_seed,
-                                                            device=torch.cuda.current_device(),
-                                                            group=mpu.get_data_parallel_group(),
-                                                            group_num=mpu.get_data_parallel_world_size(),
-                                                            density=self.args.density, 
-                                                            stable_topk_interval=self.args.stable_topk_interval, 
-                                                            stable_topk_threshold=self.args.stable_topk_threshold, 
-                                                            stable_topk_region_bucket_size=self.args.stable_topk_region_bucket_size,
-                                                            stable_topk_num_buckets=self.args.stable_topk_num_buckets,
-                                                            stable_topk_warmup_method=self.args.stable_topk_warmup_method)
-            elif self.args.grad_comp_type == "StableTopKReducerWithValBuckets":
-                self.reducer = StableTopKReducerWithValBuckets(random_seed=self.args.comp_seed,
-                                                            device=torch.cuda.current_device(),
-                                                            group=mpu.get_data_parallel_group(),
-                                                            group_num=mpu.get_data_parallel_world_size(),
-                                                            density=self.args.density, 
-                                                            stable_topk_interval=self.args.stable_topk_interval, 
-                                                            stable_topk_threshold=self.args.stable_topk_threshold, 
-                                                            stable_topk_num_buckets=self.args.stable_topk_num_buckets,
-                                                            stable_topk_warmup_method=self.args.stable_topk_warmup_method)
-            elif self.args.grad_comp_type == 'StableTopKReducerWithValBucketsEF':
-                self.reducer = StableTopKReducerWithValBucketsEF(random_seed=self.args.comp_seed,
-                                                                device=torch.cuda.current_device(),
-                                                                group=mpu.get_data_parallel_group(),
-                                                                group_num=mpu.get_data_parallel_world_size(),
-                                                                density=self.args.density, 
-                                                                stable_topk_interval=self.args.stable_topk_interval, 
-                                                                stable_topk_threshold=self.args.stable_topk_threshold, 
-                                                                stable_topk_num_buckets=self.args.stable_topk_num_buckets,
-                                                                stable_topk_warmup_method=self.args.stable_topk_warmup_method)
-            elif self.args.grad_comp_type == 'StableTopKReducerWithValBucketsEFCorrection':
-                self.reducer = StableTopKReducerWithValBucketsEFCorrection(random_seed=self.args.comp_seed,
-                                                                            device=torch.cuda.current_device(),
-                                                                            group=mpu.get_data_parallel_group(),
-                                                                            group_num=mpu.get_data_parallel_world_size(),
-                                                                            beta1=self.args.adam_beta1,
-                                                                            beta2=self.args.adam_beta2,
-                                                                            epsilon=self.args.adam_eps,
-                                                                            density=self.args.density, 
-                                                                            stable_topk_interval=self.args.stable_topk_interval, 
-                                                                            stable_topk_threshold=self.args.stable_topk_threshold, 
-                                                                            stable_topk_num_buckets=self.args.stable_topk_num_buckets,
-                                                                            stable_topk_warmup_method=self.args.stable_topk_warmup_method)
-            elif self.args.grad_comp_type == 'StableTopKReducerWithValBucketsCorrection':
-                self.reducer = StableTopKReducerWithValBucketsCorrection(random_seed=self.args.comp_seed,
-                                                                            device=torch.cuda.current_device(),
-                                                                            group=mpu.get_data_parallel_group(),
-                                                                            group_num=mpu.get_data_parallel_world_size(),
-                                                                            beta1=self.args.adam_beta1,
-                                                                            beta2=self.args.adam_beta2,
-                                                                            epsilon=self.args.adam_eps,
-                                                                            density=self.args.density, 
-                                                                            stable_topk_interval=self.args.stable_topk_interval, 
-                                                                            stable_topk_threshold=self.args.stable_topk_threshold, 
-                                                                            stable_topk_num_buckets=self.args.stable_topk_num_buckets,
-                                                                            stable_topk_warmup_method=self.args.stable_topk_warmup_method)
-            elif self.args.grad_comp_type == 'StableTopKReducerWithValBucketsEFCorrectionAutoDensity':
-                self.reducer = StableTopKReducerWithValBucketsEFCorrectionAutoDensity(random_seed=self.args.comp_seed,
-                                                                                        device=torch.cuda.current_device(),
-                                                                                        group=mpu.get_data_parallel_group(),
-                                                                                        group_num=mpu.get_data_parallel_world_size(),
-                                                                                        beta1=self.args.adam_beta1,
-                                                                                        beta2=self.args.adam_beta2,
-                                                                                        epsilon=self.args.adam_eps,
-                                                                                        density=self.args.density, 
-                                                                                        stable_topk_interval=self.args.stable_topk_interval, 
-                                                                                        stable_topk_threshold=self.args.stable_topk_threshold, 
-                                                                                        stable_topk_num_buckets=self.args.stable_topk_num_buckets,
-                                                                                        stable_topk_warmup_method=self.args.stable_topk_warmup_method)
-            elif self.args.grad_comp_type == 'StableTopKReducerWithValBucketsEFCorrectionAcrossAllLayers':
-                self.reducer = StableTopKReducerWithValBucketsEFCorrectionAcrossAllLayers(random_seed=self.args.comp_seed,
-                                                                                        device=torch.cuda.current_device(),
-                                                                                        group=mpu.get_data_parallel_group(),
-                                                                                        group_num=mpu.get_data_parallel_world_size(),
-                                                                                        beta1=self.args.adam_beta1,
-                                                                                        beta2=self.args.adam_beta2,
-                                                                                        epsilon=self.args.adam_eps,
-                                                                                        density=self.args.density, 
-                                                                                        stable_topk_interval=self.args.stable_topk_interval, 
-                                                                                        stable_topk_threshold=self.args.stable_topk_threshold, 
-                                                                                        stable_topk_num_buckets=self.args.stable_topk_num_buckets,
-                                                                                        stable_topk_warmup_method=self.args.stable_topk_warmup_method)
-            elif self.args.grad_comp_type == 'StableTopKReducerWithRangeBucketsEFCorrection':
-                self.reducer = StableTopKReducerWithRangeBucketsEFCorrection(random_seed=self.args.comp_seed,
-                                                                            device=torch.cuda.current_device(),
-                                                                            group=mpu.get_data_parallel_group(),
-                                                                            group_num=mpu.get_data_parallel_world_size(),
-                                                                            beta1=self.args.adam_beta1,
-                                                                            beta2=self.args.adam_beta2,
-                                                                            epsilon=self.args.adam_eps,
-                                                                            density=self.args.density, 
-                                                                            stable_topk_interval=self.args.stable_topk_interval, 
-                                                                            stable_topk_threshold=self.args.stable_topk_threshold, 
-                                                                            stable_topk_range=self.args.stable_topk_range,
-                                                                            stable_topk_warmup_method=self.args.stable_topk_warmup_method)
             elif self.args.grad_comp_type == 'StableTopKReducerWithRangeBucketsEFCorrectionResIsGrad':
                 self.reducer = StableTopKReducerWithRangeBucketsEFCorrectionResIsGrad(random_seed=self.args.comp_seed,
                                                                                     device=torch.cuda.current_device(),
@@ -309,60 +184,6 @@ class DistributedDataParallel(DistributedDataParallelBase):
                                                                                     stable_topk_threshold=self.args.stable_topk_threshold, 
                                                                                     stable_topk_range=self.args.stable_topk_range,
                                                                                     stable_topk_warmup_method=self.args.stable_topk_warmup_method)
-            
-            elif self.args.grad_comp_type == 'StableTopKReducerWithRangeBucketsEFCorrectionResIsGradAcrossAllLayers':
-                self.reducer = StableTopKReducerWithRangeBucketsEFCorrectionResIsGradAcrossAllLayers(random_seed=self.args.comp_seed,
-                                                                                                        device=torch.cuda.current_device(),
-                                                                                                        group=mpu.get_data_parallel_group(),
-                                                                                                        group_num=mpu.get_data_parallel_world_size(),
-                                                                                                        beta1=self.args.adam_beta1,
-                                                                                                        beta2=self.args.adam_beta2,
-                                                                                                        epsilon=self.args.adam_eps,
-                                                                                                        density=self.args.density, 
-                                                                                                        stable_topk_interval=self.args.stable_topk_interval, 
-                                                                                                        stable_topk_threshold=self.args.stable_topk_threshold, 
-                                                                                                        stable_topk_range=self.args.stable_topk_range,
-                                                                                                        stable_topk_warmup_method=self.args.stable_topk_warmup_method)
-            elif self.args.grad_comp_type == 'StableTopKReducerWithRangeBucketsEFCorrectionResIsGradLAMB':
-                self.reducer = StableTopKReducerWithRangeBucketsEFCorrectionResIsGradLAMB(random_seed=self.args.comp_seed,
-                                                                                    device=torch.cuda.current_device(),
-                                                                                    group=mpu.get_data_parallel_group(),
-                                                                                    group_num=mpu.get_data_parallel_world_size(),
-                                                                                    beta1=self.args.adam_beta1,
-                                                                                    beta2=self.args.adam_beta2,
-                                                                                    epsilon=self.args.adam_eps,
-                                                                                    density=self.args.density, 
-                                                                                    stable_topk_interval=self.args.stable_topk_interval, 
-                                                                                    stable_topk_threshold=self.args.stable_topk_threshold, 
-                                                                                    stable_topk_range=self.args.stable_topk_range,
-                                                                                    stable_topk_warmup_method=self.args.stable_topk_warmup_method)
-            elif self.args.grad_comp_type == 'StableTopKReducerWithRangeBucketsEFCorrectionResIsGradLAMBAcrossAllLayers':
-                self.reducer = StableTopKReducerWithRangeBucketsEFCorrectionResIsGradLAMBAcrossAllLayers(random_seed=self.args.comp_seed,
-                                                                                    device=torch.cuda.current_device(),
-                                                                                    group=mpu.get_data_parallel_group(),
-                                                                                    group_num=mpu.get_data_parallel_world_size(),
-                                                                                    beta1=self.args.adam_beta1,
-                                                                                    beta2=self.args.adam_beta2,
-                                                                                    epsilon=self.args.adam_eps,
-                                                                                    density=self.args.density, 
-                                                                                    stable_topk_interval=self.args.stable_topk_interval, 
-                                                                                    stable_topk_threshold=self.args.stable_topk_threshold, 
-                                                                                    stable_topk_range=self.args.stable_topk_range,
-                                                                                    stable_topk_warmup_method=self.args.stable_topk_warmup_method)
-            elif self.args.grad_comp_type == 'StableTopKReducerWithRangeBucketsEFCorrectionResIsGradWarmup':
-                self.reducer = StableTopKReducerWithRangeBucketsEFCorrectionResIsGradWarmup(random_seed=self.args.comp_seed,
-                                                                                    device=torch.cuda.current_device(),
-                                                                                    group=mpu.get_data_parallel_group(),
-                                                                                    group_num=mpu.get_data_parallel_world_size(),
-                                                                                    beta1=self.args.adam_beta1,
-                                                                                    beta2=self.args.adam_beta2,
-                                                                                    epsilon=self.args.adam_eps,
-                                                                                    density=self.args.density, 
-                                                                                    stable_topk_interval=self.args.stable_topk_interval, 
-                                                                                    stable_topk_threshold=self.args.stable_topk_threshold, 
-                                                                                    stable_topk_range=self.args.stable_topk_range,
-                                                                                    stable_topk_warmup_method=self.args.stable_topk_warmup_method,
-                                                                                    stable_topk_density_warmup_steps=self.args.stable_topk_density_warmup_steps) # hardcode it for now
             elif self.args.grad_comp_type == 'TopKReducerEFCorrectionResIsGradWarmup':
                 self.reducer = TopKReducerEFCorrectionResIsGradWarmup(random_seed=self.args.comp_seed,
                                                                 device=torch.cuda.current_device(),
@@ -375,68 +196,6 @@ class DistributedDataParallel(DistributedDataParallelBase):
                                                                 stable_topk_threshold=self.args.stable_topk_threshold, 
                                                                 stable_topk_warmup_method=self.args.stable_topk_warmup_method,
                                                                 stable_topk_density_warmup_steps=self.args.stable_topk_density_warmup_steps)
-            elif self.args.grad_comp_type == 'StableTopKReducerWithRangeBucketsEFCorrectionResIsGradExp':
-                self.reducer = StableTopKReducerWithRangeBucketsEFCorrectionResIsGradExp(random_seed=self.args.comp_seed,
-                                                                                    device=torch.cuda.current_device(),
-                                                                                    group=mpu.get_data_parallel_group(),
-                                                                                    group_num=mpu.get_data_parallel_world_size(),
-                                                                                    beta1=self.args.adam_beta1,
-                                                                                    beta2=self.args.adam_beta2,
-                                                                                    epsilon=self.args.adam_eps,
-                                                                                    density=self.args.density, 
-                                                                                    stable_topk_interval=self.args.stable_topk_interval, 
-                                                                                    stable_topk_threshold=self.args.stable_topk_threshold, 
-                                                                                    stable_topk_range=self.args.stable_topk_range,
-                                                                                    stable_topk_warmup_method=self.args.stable_topk_warmup_method)
-            elif self.args.grad_comp_type == 'StableTopKReducerWithRangeBucketsEFCorrectionResIsMomentum':
-                self.reducer = StableTopKReducerWithRangeBucketsEFCorrectionResIsMomentum(random_seed=self.args.comp_seed,
-                                                                                    device=torch.cuda.current_device(),
-                                                                                    group=mpu.get_data_parallel_group(),
-                                                                                    group_num=mpu.get_data_parallel_world_size(),
-                                                                                    density=self.args.density, 
-                                                                                    stable_topk_interval=self.args.stable_topk_interval, 
-                                                                                    stable_topk_threshold=self.args.stable_topk_threshold, 
-                                                                                    stable_topk_range=self.args.stable_topk_range,
-                                                                                    stable_topk_warmup_method=self.args.stable_topk_warmup_method)
-            elif self.args.grad_comp_type == 'StableTopKReducerWithRangeBucketsEFCorrectionResIsGradSign':
-                self.reducer = StableTopKReducerWithRangeBucketsEFCorrectionResIsGradSign(random_seed=self.args.comp_seed,
-                                                                                    device=torch.cuda.current_device(),
-                                                                                    group=mpu.get_data_parallel_group(),
-                                                                                    group_num=mpu.get_data_parallel_world_size(),
-                                                                                    beta1=self.args.adam_beta1,
-                                                                                    beta2=self.args.adam_beta2,
-                                                                                    epsilon=self.args.adam_eps,
-                                                                                    density=self.args.density, 
-                                                                                    stable_topk_interval=self.args.stable_topk_interval, 
-                                                                                    stable_topk_threshold=self.args.stable_topk_threshold, 
-                                                                                    stable_topk_range=self.args.stable_topk_range,
-                                                                                    stable_topk_warmup_method=self.args.stable_topk_warmup_method)
-            elif self.args.grad_comp_type == 'StableTopKReducerWithRangeBucketsEFCorrectionResIsGradNorm':
-                self.reducer = StableTopKReducerWithRangeBucketsEFCorrectionResIsGradNorm(random_seed=self.args.comp_seed,
-                                                                                    device=torch.cuda.current_device(),
-                                                                                    group=mpu.get_data_parallel_group(),
-                                                                                    group_num=mpu.get_data_parallel_world_size(),
-                                                                                    beta1=self.args.adam_beta1,
-                                                                                    beta2=self.args.adam_beta2,
-                                                                                    epsilon=self.args.adam_eps,
-                                                                                    density=self.args.density, 
-                                                                                    stable_topk_interval=self.args.stable_topk_interval, 
-                                                                                    stable_topk_threshold=self.args.stable_topk_threshold, 
-                                                                                    stable_topk_range=self.args.stable_topk_range,
-                                                                                    stable_topk_warmup_method=self.args.stable_topk_warmup_method)
-            elif self.args.grad_comp_type == 'StableTopKReducerWithRangeBucketsEFCorrectionResIsGradSelectByGradDivW':
-                self.reducer = StableTopKReducerWithRangeBucketsEFCorrectionResIsGradSelectByGradDivW(random_seed=self.args.comp_seed,
-                                                                                    device=torch.cuda.current_device(),
-                                                                                    group=mpu.get_data_parallel_group(),
-                                                                                    group_num=mpu.get_data_parallel_world_size(),
-                                                                                    beta1=self.args.adam_beta1,
-                                                                                    beta2=self.args.adam_beta2,
-                                                                                    epsilon=self.args.adam_eps,
-                                                                                    density=self.args.density, 
-                                                                                    stable_topk_interval=self.args.stable_topk_interval, 
-                                                                                    stable_topk_threshold=self.args.stable_topk_threshold, 
-                                                                                    stable_topk_range=self.args.stable_topk_range,
-                                                                                    stable_topk_warmup_method=self.args.stable_topk_warmup_method)
             elif self.args.grad_comp_type == 'StableTopKReducerWithRangeBucketsEFCorrectionResIsGradPerLayer':
                 self.reducer = StableTopKReducerWithRangeBucketsEFCorrectionResIsGradPerLayer(random_seed=self.args.comp_seed,
                                                                                     device=torch.cuda.current_device(),
