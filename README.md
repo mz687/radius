@@ -7,7 +7,7 @@ Radius leverages the fact that the gradient values exbit temporal stability duri
 This project is now being developed based on Megatron-LM.
 
 ## How to run pre-training
-We have provided the slurm scripts for pre-training GPT-355M and GPT-2.0B models using different dense allreduce and Radius [here](radius_public/slurm_scrips/perlmutter_scripts).
+We have provided the slurm scripts for pre-training GPT-355M and GPT-2.0B models using different dense allreduce and Radius [here](./slurm_scrips/perlmutter_scripts/).
 
 Here is an example
 ```
