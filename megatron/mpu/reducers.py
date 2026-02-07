@@ -3295,26 +3295,26 @@ class TopKReducerEFCorrectionResIsGradWarmup(Reducer):
     
     def resample_topk_indices(self, module, dtype, start_end_idx_per_layer, tensor, ratio):
         indices = []
-        # for layer_start_end_idx in start_end_idx_per_layer[dtype].values():
-        #     layer_start_idx, layer_end_idx = layer_start_end_idx
+        for layer_start_end_idx in start_end_idx_per_layer[dtype].values():
+            layer_start_idx, layer_end_idx = layer_start_end_idx
             
-        #     numel_cur_layer = layer_end_idx - layer_start_idx
+            numel_cur_layer = layer_end_idx - layer_start_idx
 
-        #     k=max(int(numel_cur_layer*ratio), 1)
-        #     _, topk_indices = torch.topk(tensor[layer_start_idx:layer_end_idx].abs(), k=k)
-        #     topk_indices.data.add_(layer_start_idx)
-        #     topk_indices,_ = torch.sort(topk_indices)
-        #     indices.append(topk_indices)
+            k=max(int(numel_cur_layer*ratio), 1)
+            _, topk_indices = torch.topk(tensor[layer_start_idx:layer_end_idx].abs(), k=k)
+            topk_indices.data.add_(layer_start_idx)
+            topk_indices,_ = torch.sort(topk_indices)
+            indices.append(topk_indices)
 
-        for i, (name, param) in enumerate(module.named_parameters()):
-            if param.requires_grad:
-                layer_start_idx, layer_end_idx = start_end_idx_per_layer[dtype][i]
-                numel_cur_layer = layer_end_idx - layer_start_idx
-                k=max(int(numel_cur_layer*ratio), 1)
-                _, topk_indices = torch.topk((param/param.main_grad).abs().view(-1), k=k)
-                topk_indices.data.add_(layer_start_idx)
-                topk_indices,_ = torch.sort(topk_indices)
-                indices.append(topk_indices)
+        # for i, (name, param) in enumerate(module.named_parameters()):
+        #     if param.requires_grad:
+        #         layer_start_idx, layer_end_idx = start_end_idx_per_layer[dtype][i]
+        #         numel_cur_layer = layer_end_idx - layer_start_idx
+        #         k=max(int(numel_cur_layer*ratio), 1)
+        #         _, topk_indices = torch.topk((param/param.main_grad).abs().view(-1), k=k)
+        #         topk_indices.data.add_(layer_start_idx)
+        #         topk_indices,_ = torch.sort(topk_indices)
+        #         indices.append(topk_indices)
 
         indices = torch.cat(indices)
         return indices
